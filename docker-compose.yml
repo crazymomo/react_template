@@ -6,7 +6,7 @@ services:
     build:
       context: ./web-engine
     restart: always
-    command: bash -c 'cd /mnt/web-engine/service; yarn start'
+    command: bash -c 'cd /mnt/web-engine/service; yarn install; yarn start'
     volumes:
       - ./web-engine:/mnt/web-engine
     networks:
