@@ -1,0 +1,42 @@
+version: '3.0'
+
+services:
+  # web engine
+  web-engine:
+    build:
+      context: ./web-engine
+    restart: always
+    command: bash -c 'cd /mnt/web-engine/service; yarn start'
+    volumes:
+      - ./web-engine:/mnt/web-engine
+    networks:
+      - app-network
+  # web engine release
+  web-engine-dist:
+    image: nginx
+    restart: always
+    volumes:
+      - ./web-engine/service/build:/usr/share/nginx/html
+    networks:
+      - app-network
+  # haproxy
+  haproxy:
+    depends_on:
+      - web-engine
+      - web-engine-dist
+    image: haproxy:alpine
+    restart: always
+    command: sh -c 'haproxy -db -f /mnt/haproxy/config/haproxy.cfg'
+    volumes:
+      - ./haproxy:/mnt/haproxy
+    ports:
+      - "80:80"
+      - "8080:8080"
+    links:
+      - web-engine:web-engine
+      - web-engine-dist:web-engine-dist
+    networks:
+      - app-network
+networks:
+    app-network:
+      driver: bridge
